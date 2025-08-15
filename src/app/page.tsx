@@ -7,6 +7,7 @@ import Papa from 'papaparse';
 /* ---------- Types ---------- */
 type Row = {
   CODGEO: string;
+  name?: string;
   P22_POP: number;
   SUPERF: number;
   NAIS23: number;
@@ -20,6 +21,12 @@ type Row = {
   P22_POPF: number;
   C22_POP15P_STAT_GSEC32: number;
 };
+
+const QUICK_CITIES = [
+  { code: '44109', name: 'Nantes' },
+  { code: '69385', name: 'Lyon' },
+  { code: '33063', name: 'Bordeaux' },
+];
 
 /* ========================================================== */
 /*                          PAGE                              */
@@ -54,7 +61,13 @@ export default function Home() {
           P22_POPF: toNum(r.P22_POPF),
           C22_POP15P_STAT_GSEC32: toNum(r.C22_POP15P_STAT_GSEC32),
         }));
-        setData(rows);
+        fetch('https://geo.api.gouv.fr/communes?fields=nom,code&format=json')
+          .then((r) => r.json())
+          .then((list: any[]) => {
+            const map = new Map(list.map((c) => [c.code, c.nom]));
+            setData(rows.map((r) => ({ ...r, name: map.get(r.CODGEO) })));
+          })
+          .catch(() => setData(rows));
       },
     });
   }, []);
@@ -64,7 +77,13 @@ export default function Home() {
       (focusBox === 'search' ? q : focusBox === 'c1' ? c1 : focusBox === 'c2' ? c2 : '')
         .toLowerCase();
     if (!term) return [];
-    return data.filter((r) => r.CODGEO.toLowerCase().includes(term)).slice(0, 8);
+    return data
+      .filter(
+        (r) =>
+          r.CODGEO.toLowerCase().includes(term) ||
+          (r.name ?? '').toLowerCase().includes(term)
+      )
+      .slice(0, 8);
   }, [data, q, c1, c2, focusBox]);
 
   const trends = useMemo(() => {
@@ -83,13 +102,26 @@ export default function Home() {
   }, [data]);
 
   function goExplore() {
-    const code = q.trim();
-    if (!code || !data.find((r) => r.CODGEO === code)) return;
-    router.push(`/commune/${encodeURIComponent(code)}/v2`);
+    const term = q.trim().toLowerCase();
+    const row = data.find(
+      (r) => r.CODGEO.toLowerCase() === term || (r.name ?? '').toLowerCase() === term
+    );
+    if (!row) return;
+    router.push(`/commune/${encodeURIComponent(row.CODGEO)}/v2`);
   }
   function goCompare() {
-    if (!c1 || !c2) return;
-    router.push(`/commune/${encodeURIComponent(c1)}/v2?compare=${encodeURIComponent(c2)}`);
+    const t1 = c1.trim().toLowerCase();
+    const t2 = c2.trim().toLowerCase();
+    const r1 = data.find(
+      (r) => r.CODGEO.toLowerCase() === t1 || (r.name ?? '').toLowerCase() === t1
+    );
+    const r2 = data.find(
+      (r) => r.CODGEO.toLowerCase() === t2 || (r.name ?? '').toLowerCase() === t2
+    );
+    if (!r1 || !r2) return;
+    router.push(
+      `/commune/${encodeURIComponent(r1.CODGEO)}/v2?compare=${encodeURIComponent(r2.CODGEO)}`
+    );
   }
 
   return (
@@ -137,7 +169,7 @@ export default function Home() {
                   onChange={(e) => setQ(e.target.value)}
                   onFocus={() => setFocusBox('search')}
                   onBlur={() => setTimeout(() => setFocusBox(null), 150)}
-                  placeholder="Rechercher une commune (CODGEO)"
+                  placeholder="Rechercher une commune"
                   className="w-full rounded-2xl bg-white/10 px-4 py-3 pr-3 text-white placeholder-white/60 outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-[#6D5EF3]"
                 />
                 {focusBox === 'search' && suggestions.length > 0 && (
@@ -146,9 +178,9 @@ export default function Home() {
                       <li
                         key={s.CODGEO}
                         className="cursor-pointer px-4 py-2 hover:bg-white/5"
-                        onMouseDown={() => setQ(s.CODGEO)}
+                        onMouseDown={() => setQ(s.name || s.CODGEO)}
                       >
-                        {s.CODGEO} <span className="opacity-60">• {fmtPop(s.P22_POP)} hab.</span>
+                        {(s.name || s.CODGEO)} <span className="opacity-60">• {fmtPop(s.P22_POP)} hab.</span>
                       </li>
                     ))}
                   </ul>
@@ -164,13 +196,13 @@ export default function Home() {
 
             {/* city chips */}
             <div className="mt-3 flex flex-wrap gap-2">
-              {exampleCodes(data).map((code) => (
+              {QUICK_CITIES.map((c) => (
                 <button
-                  key={code}
-                  onClick={() => setQ(code)}
+                  key={c.code}
+                  onClick={() => setQ(c.name)}
                   className="rounded-full bg-white/10 px-3 py-1 text-sm ring-1 ring-white/10 hover:bg-white/15"
                 >
-                  {code}
+                  {c.name}
                 </button>
               ))}
             </div>
@@ -277,12 +309,18 @@ function InputSuggest({
   onFocus: () => void;
   onBlur: () => void;
   open: boolean;
-}) {
-  const list = useMemo(() => {
-    const term = value.toLowerCase();
-    if (!term) return [];
-    return data.filter((r) => r.CODGEO.toLowerCase().includes(term)).slice(0, 6);
-  }, [data, value]);
+  }) {
+    const list = useMemo(() => {
+      const term = value.toLowerCase();
+      if (!term) return [];
+      return data
+        .filter(
+          (r) =>
+            r.CODGEO.toLowerCase().includes(term) ||
+            (r.name ?? '').toLowerCase().includes(term)
+        )
+        .slice(0, 6);
+    }, [data, value]);
 
   return (
     <div className="relative">
@@ -296,15 +334,15 @@ function InputSuggest({
       />
       {open && list.length > 0 && (
         <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl bg-[#0e2a51] ring-1 ring-white/10">
-          {list.map((s) => (
-            <li
-              key={s.CODGEO}
-              className="cursor-pointer px-4 py-2 hover:bg-white/5"
-              onMouseDown={() => setValue(s.CODGEO)}
-            >
-              {s.CODGEO} <span className="opacity-60">• {fmtPop(s.P22_POP)} hab.</span>
-            </li>
-          ))}
+            {list.map((s) => (
+              <li
+                key={s.CODGEO}
+                className="cursor-pointer px-4 py-2 hover:bg-white/5"
+                onMouseDown={() => setValue(s.name || s.CODGEO)}
+              >
+                {(s.name || s.CODGEO)} <span className="opacity-60">• {fmtPop(s.P22_POP)} hab.</span>
+              </li>
+            ))}
         </ul>
       )}
     </div>
@@ -322,7 +360,7 @@ function TrendCard({ row }: { row: Row }) {
         <div className="absolute inset-0 bg-gradient-to-br from-[#2dd4bf] to-[#3b82f6]" />
         <span className="absolute left-2 top-2 rounded-md bg-black/30 px-2 py-1 text-xs">Annonce</span>
       </div>
-      <div className="text-lg font-semibold">{row.CODGEO}</div>
+      <div className="text-lg font-semibold">{row.name || row.CODGEO}</div>
       <div className={`mt-1 text-sm ${growth >= 0 ? 'text-teal-300' : 'text-orange-300'}`}>
         {growth >= 0 ? '▲' : '▼'} {fmtNumber(Math.abs(growth))} %
       </div>
@@ -401,12 +439,8 @@ function fmtPop(n: number) {
   if (n >= 1_000) return `${(n / 1_000).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} k`;
   return n.toLocaleString('fr-FR');
 }
-function fmtArea(n: number) {
-  if (!Number.isFinite(n)) return '—';
-  const rounded = Math.round(n);
-  return `${rounded.toLocaleString('fr-FR')} km²`;
-}
-function exampleCodes(rows: Row[]) {
-  const sample = rows.slice(0, 3).map((r) => r.CODGEO);
-  return sample.length ? sample : ['01001', '01002', '01004'];
-}
+  function fmtArea(n: number) {
+    if (!Number.isFinite(n)) return '—';
+    const rounded = Math.round(n);
+    return `${rounded.toLocaleString('fr-FR')} km²`;
+  }
