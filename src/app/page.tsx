@@ -102,10 +102,22 @@ export default function Home() {
             <span className="text-lg font-semibold">CommuneData</span>
           </div>
           <div className="flex items-center gap-6 text-sm">
-            <span className="opacity-90">Données</span>
-            <span className="opacity-90">Comparer</span>
-            <span className="opacity-90">À propos</span>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">☰</span>
+            <a href="#" className="opacity-90 hover:opacity-100">
+              Données
+            </a>
+            <a href="#" className="opacity-90 hover:opacity-100">
+              Comparer
+            </a>
+            <a href="#" className="opacity-90 hover:opacity-100">
+              À propos
+            </a>
+            <button
+              type="button"
+              aria-label="Ouvrir le menu"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10"
+            >
+              ☰
+            </button>
           </div>
         </nav>
 
@@ -334,7 +346,12 @@ function SourceCard({ icon, label }: { icon: string; label: string }) {
 
 function FranceMapLarge() {
   return (
-    <svg viewBox="0 0 100 100" className="h-72 w-full">
+    <svg
+      viewBox="0 0 100 100"
+      className="h-72 w-full"
+      role="img"
+      aria-label="Carte de la France"
+    >
       <defs>
         <linearGradient id="mapg" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0%" stopColor="#52E3E1" />
