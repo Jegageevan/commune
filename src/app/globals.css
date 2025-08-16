@@ -26,7 +26,7 @@ body {
 }
 @layer utilities {
   .gradient-blue-teal {
-    @apply bg-gradient-to-br from-[#0AAE8A] via-[#0e3c70] to-[#0b2766];
+    @apply bg-gradient-to-br from-[#0b2766] via-[#0e3c70] to-[#0AAE8A];
   }
   .gradient-yellow-orange {
     @apply bg-gradient-to-r from-yellow-400 to-orange-500;

@@ -85,17 +85,32 @@ export default function Home() {
                 </div>
                 <Button
                   type="submit"
-                  className="h-16 px-10 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl shadow-xl font-bold text-lg"
+                  className="h-16 px-10 text-white rounded-2xl shadow-xl font-bold text-lg bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600"
                 >
                   Explorer
                 </Button>
               </form>
             </div>
 
-            <div className="flex space-x-8">
-              <button onClick={() => handleQuickSearch('Nantes')} className="text-white/90 hover:text-white underline font-medium text-lg">Nantes</button>
-              <button onClick={() => handleQuickSearch('Lyon')} className="text-white/90 hover:text-white underline font-medium text-lg">Lyon</button>
-              <button onClick={() => handleQuickSearch('Bordeaux')} className="text-white/90 hover:text-white underline font-medium text-lg">Bordeaux</button>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => handleQuickSearch('Nantes')}
+                className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium text-lg"
+              >
+                Nantes
+              </button>
+              <button
+                onClick={() => handleQuickSearch('Lyon')}
+                className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium text-lg"
+              >
+                Lyon
+              </button>
+              <button
+                onClick={() => handleQuickSearch('Bordeaux')}
+                className="px-5 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium text-lg"
+              >
+                Bordeaux
+              </button>
             </div>
           </div>
         </div>
