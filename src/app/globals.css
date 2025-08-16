@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@layer utilities {
+  .gradient-blue-teal {
+    @apply bg-gradient-to-br from-[#0AAE8A] via-[#0e3c70] to-[#0b2766];
+  }
+  .gradient-yellow-orange {
+    @apply bg-gradient-to-r from-yellow-400 to-orange-500;
+  }
+  .text-teal-bright {
+    @apply text-teal-300;
+  }
+  .data-card {
+    @apply bg-white/10 backdrop-blur-md rounded-3xl shadow-xl;
+  }
+}
