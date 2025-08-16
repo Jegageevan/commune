@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from "recharts";
 import { ArrowLeft, TrendingUp } from "lucide-react";
-import franceMapImage from "/globe.svg";
+const franceMapImage = "/globe.svg";
 
 interface CommuneProfileProps {
   commune: CommuneData;
