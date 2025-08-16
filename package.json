@@ -12,7 +12,9 @@
     "next": "15.4.6",
     "papaparse": "^5.5.3",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "lucide-react": "^0.414.0",
+    "recharts": "^2.10.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
