@@ -95,26 +95,35 @@ export default function VisualiserCommune({ params }: { params: Promise<{ codgeo
   return (
     <main className="min-h-screen bg-white text-gray-800 p-6">
       <div className="mx-auto max-w-5xl space-y-8">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="text-3xl font-semibold">
             Commune <span className="text-gray-500">({code})</span>
           </h1>
-          <Link href="/" className="text-sm text-blue-600 underline">
-            Retour
+          <Link
+            href="/"
+            className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm text-white"
+          >
+            Comparer cette commune
           </Link>
         </header>
 
-        <section className="grid gap-6 md:grid-cols-2">
-          {/* Population */}
-          <div className="rounded-xl border p-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">Population</h2>
-            <p className="text-4xl font-bold">{fmtInt(row.P22_POP)} hab.</p>
-            <p className="mt-2 text-sm text-gray-600">Superficie : {fmtNumber(row.SUPERF)} km²</p>
-          </div>
+        {/* Cartes de statistiques */}
+        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard title="Population" value={`${fmtInt(row.P22_POP)} hab.`} />
+          <StatCard title="Superficie" value={`${fmtNumber(row.SUPERF)} km²`} />
+          <StatCard
+            title="Logements"
+            value={fmtInt(row.P22_LOG)}
+            sub={`${fmtInt(row.P22_LOGVAC)} vacants`}
+          />
+          <StatCard title="Médecins" value={fmtInt(row.MED21)} />
+        </section>
 
-          {/* Genre */}
+        {/* Graphiques */}
+        <section className="grid gap-6 md:grid-cols-2">
+          {/* Répartition H/F */}
           <div className="rounded-xl border p-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">Répartition H/F</h2>
+            <h2 className="mb-4 text-lg font-medium">Répartition H/F</h2>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -134,12 +143,10 @@ export default function VisualiserCommune({ params }: { params: Promise<{ codgeo
               </ResponsiveContainer>
             </div>
           </div>
-        </section>
 
-        <section className="grid gap-6 md:grid-cols-2">
           {/* Naissances vs décès */}
           <div className="rounded-xl border p-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">Naissances / Décès 2023</h2>
+            <h2 className="mb-4 text-lg font-medium">Naissances / Décès 2023</h2>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={birthDeathData}>
@@ -157,8 +164,8 @@ export default function VisualiserCommune({ params }: { params: Promise<{ codgeo
           </div>
 
           {/* Emploi */}
-          <div className="rounded-xl border p-4 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">Emploi 15–64 ans</h2>
+          <div className="rounded-xl border p-4 shadow-sm md:col-span-2">
+            <h2 className="mb-4 text-lg font-medium">Emploi 15–64 ans</h2>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={employmentData}>
@@ -177,6 +184,24 @@ export default function VisualiserCommune({ params }: { params: Promise<{ codgeo
         </section>
       </div>
     </main>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  sub,
+}: {
+  title: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-xl border p-4 shadow-sm">
+      <h2 className="mb-2 text-sm font-medium text-gray-500">{title}</h2>
+      <p className="text-2xl font-bold">{value}</p>
+      {sub && <p className="mt-1 text-sm text-gray-600">{sub}</p>}
+    </div>
   );
 }
 
